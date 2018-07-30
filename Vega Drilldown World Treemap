@@ -1,0 +1,409 @@
+{
+  "$schema": "https://vega.github.io/schema/vega/v4.json",
+  "width": 960,
+  "height": 424,
+  "padding": 0,
+  "autosize": "none",
+  "signals": [
+    {
+      "name": "selected",
+      "value": "",
+      "on": [
+        {
+          "events": "rect:click!",
+          "update": "datum.depth!=3?datum:selected"
+        }
+      ]
+    }
+  ],
+  "data": [
+    {
+      "name": "dataSample",
+      "url": "https://api.myjson.com/bins/16r74m",
+      "transform": [
+        {
+          "type": "filter",
+          "expr": "selected?(selected.depth==1?datum.region==selected.key:datum.subregion==selected.key):datum"
+        }
+      ]
+    },
+    {
+      "name": "subregionAggregate",
+      "source": "dataSample",
+      "transform": [
+        {
+          "type": "aggregate",
+          "groupby": [
+            "subregion"
+          ],
+          "fields": [
+            "records"
+          ],
+          "ops": [
+            "sum"
+          ],
+          "as": [
+            "total"
+          ]
+        },
+        {
+          "type": "formula",
+          "as": "key",
+          "expr": "datum.subregion"
+        }
+      ]
+    },
+    {
+      "name": "regionAggregate",
+      "source": "dataSample",
+      "transform": [
+        {
+          "type": "aggregate",
+          "groupby": [
+            "region"
+          ],
+          "fields": [
+            "records"
+          ],
+          "ops": [
+            "sum"
+          ],
+          "as": [
+            "total"
+          ]
+        },
+        {
+          "type": "formula",
+          "as": "key",
+          "expr": "datum.region"
+        }
+      ]
+    },
+    {
+      "name": "totalAggregate",
+      "source": "dataSample",
+      "transform": [
+        {
+          "type": "aggregate",
+          "fields": [
+            "records"
+          ],
+          "ops": [
+            "sum"
+          ],
+          "as": [
+            "total"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "allAggregates",
+      "source": [
+        "subregionAggregate",
+        "regionAggregate"
+      ]
+    },
+    {
+      "name": "tree",
+      "source": "dataSample",
+      "transform": [
+        {
+          "type": "nest",
+          "generate": true,
+          "keys": [
+            "region",
+            "subregion"
+          ]
+        },
+        {
+          "type": "treemap",
+          "field": "records",
+          "method": "squarify",
+          "round": false,
+          "sort": {
+            "field": "value",
+            "order": "descending"
+          },
+          "ratio": {
+            "signal": "height / width * 0.5 * (1 + sqrt(5))"
+          },
+          "size": [
+            {
+              "signal": "width"
+            },
+            {
+              "signal": "height"
+            }
+          ]
+        },
+        {
+          "type": "lookup",
+          "from": "allAggregates",
+          "key": "key",
+          "fields": [
+            "key"
+          ],
+          "values": [
+            "total"
+          ],
+          "as": [
+            "total"
+          ]
+        },
+        {
+          "type": "lookup",
+          "from": "dataSample",
+          "key": "subregion",
+          "fields": [
+            "key"
+          ],
+          "values": [
+            "region"
+          ],
+          "as": [
+            "parent"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "nodes",
+      "source": "tree",
+      "transform": [
+        {
+          "type": "filter",
+          "expr": "selected?(selected.depth==2?datum.depth==3:datum.depth==(selected.depth+1)):datum.depth==1"
+        }
+      ]
+    },
+    {
+      "name": "leaves",
+      "source": "tree",
+      "transform": [
+        {
+          "type": "filter",
+          "expr": "selected?(selected.depth==2?datum.depth==3:datum.depth==(selected.depth+2)):datum.depth==2"
+        }
+      ]
+    }
+  ],
+  "scales": [
+    {
+      "name": "color",
+      "type": "ordinal",
+      "domain": {
+        "data": "nodes",
+        "field": {
+          "signal": "'key'"
+        },
+        "sort": true
+      },
+      "range": {
+        "scheme": "category20"
+      }
+    }
+  ],
+  "marks": [
+    {
+      "name": "mark2",
+      "type": "rect",
+      "from": {
+        "data": "leaves"
+      },
+      "interactive": true,
+      "encode": {
+        "enter": {
+          "fill": {
+            "scale": "color",
+            "signal": "selected?datum.subregion:datum.parent"
+          },
+          "fillOpacity": {
+            "signal": "random()+0.05"
+          },
+          "stroke": {
+            "value": "#fff"
+          },
+          "strokeWidth": {
+            "value": 1
+          }
+        },
+        "update": {
+          "x": {
+            "field": "x0"
+          },
+          "y": {
+            "field": "y0"
+          },
+          "x2": {
+            "field": "x1"
+          },
+          "y2": {
+            "field": "y1"
+          }
+        }
+      }
+    },
+    {
+      "type": "text",
+      "from": {
+        "data": "leaves"
+      },
+      "interactive": false,
+      "encode": {
+        "enter": {
+          "font": {
+            "value": "Helvetica Neue, Arial"
+          },
+          "align": {
+            "value": "right"
+          },
+          "baseline": {
+            "value": "bottom"
+          },
+          "fill": {
+            "value": "#000"
+          },
+          "fontSize": {
+            "value": 12
+          }
+        },
+        "update": {
+          "text": {
+            "signal": "datum.depth==2?datum.key:(selected.depth==2?'':datum.country)"
+          },
+          "x": {
+            "signal": "(datum.x1)"
+          },
+          "y": {
+            "signal": "(datum.y1)"
+          },
+          "limit": {
+            "signal": "datum.x1-datum.x0"
+          }
+        }
+      }
+    },
+    {
+      "name": "mark1",
+      "type": "rect",
+      "from": {
+        "data": "nodes"
+      },
+      "interactive": true,
+      "encode": {
+        "enter": {
+          "fill": {
+            "value": "transparent"
+          },
+          "stroke": {
+            "value": "#fff"
+          },
+          "strokeWidth": {
+            "value": 2
+          }
+        },
+        "update": {
+          "x": {
+            "field": "x0"
+          },
+          "y": {
+            "field": "y0"
+          },
+          "x2": {
+            "field": "x1"
+          },
+          "y2": {
+            "field": "y1"
+          }
+        }
+      }
+    },
+    {
+      "type": "text",
+      "from": {
+        "data": "nodes"
+      },
+      "interactive": false,
+      "encode": {
+        "enter": {
+          "font": {
+            "value": "Helvetica Neue, Arial"
+          },
+          "align": {
+            "value": "left"
+          },
+          "baseline": {
+            "value": "top"
+          },
+          "fill": {
+            "value": "#000"
+          },
+          "fontSize": {
+            "value": 18
+          },
+          "fontWeight": {
+            "value": "bold"
+          }
+        },
+        "update": {
+          "text": {
+            "signal": "datum.key?datum.key:datum.country"
+          },
+          "x": {
+            "signal": "datum.x0"
+          },
+          "y": {
+            "signal": "datum.y0"
+          },
+          "limit": {
+            "signal": "datum.x1-datum.x0"
+          }
+        }
+      }
+    },
+    {
+      "type": "text",
+      "from": {
+        "data": "nodes"
+      },
+      "interactive": false,
+      "encode": {
+        "enter": {
+          "font": {
+            "value": "Helvetica Neue, Arial"
+          },
+          "align": {
+            "value": "left"
+          },
+          "baseline": {
+            "value": "top"
+          },
+          "fill": {
+            "value": "#000"
+          },
+          "fontSize": {
+            "value": 18
+          },
+          "fontWeight": {
+            "value": "bold"
+          }
+        },
+        "update": {
+          "text": {
+            "signal": "selected.depth==2?format(datum.records,','):format(datum.total,',')"
+          },
+          "x": {
+            "signal": "datum.x0"
+          },
+          "y": {
+            "signal": "datum.y0+20"
+          },
+          "limit": {
+            "signal": "datum.x1-datum.x0"
+          }
+        }
+      }
+    }
+  ]
+}
