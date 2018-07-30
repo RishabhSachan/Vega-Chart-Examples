@@ -18,8 +18,12 @@
   ],
   "data": [
     {
+      "name": "dataLoaded",
+      "url": "https://api.myjson.com/bins/16r74m"
+    },
+    {
       "name": "dataSample",
-      "url": "https://api.myjson.com/bins/16r74m",
+      "source": "dataLoaded",
       "transform": [
         {
           "type": "filter",
@@ -29,7 +33,7 @@
     },
     {
       "name": "subregionAggregate",
-      "source": "dataSample",
+      "source": "dataLoaded",
       "transform": [
         {
           "type": "aggregate",
@@ -55,7 +59,7 @@
     },
     {
       "name": "regionAggregate",
-      "source": "dataSample",
+      "source": "dataLoaded",
       "transform": [
         {
           "type": "aggregate",
@@ -81,7 +85,7 @@
     },
     {
       "name": "totalAggregate",
-      "source": "dataSample",
+      "source": "dataLoaded",
       "transform": [
         {
           "type": "aggregate",
