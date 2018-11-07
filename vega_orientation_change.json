@@ -1,0 +1,184 @@
+{
+  "$schema": "https://vega.github.io/schema/vega/v4.json",
+  "width": 400,
+  "height": 200,
+  "padding": 5,
+
+  "data": [
+    {
+      "name": "table",
+      "values": [
+        {"category": "A", "amount": 28},
+        {"category": "B", "amount": 55},
+        {"category": "C", "amount": 43},
+        {"category": "D", "amount": 91},
+        {"category": "E", "amount": 81},
+        {"category": "F", "amount": 53},
+        {"category": "G", "amount": 19},
+        {"category": "H", "amount": 87}
+      ]
+    }
+  ],
+
+  "signals": [
+    {
+      "name": "tooltip",
+      "value": {},
+      "on": [
+        {"events": "rect:mouseover", "update": "datum"},
+        {"events": "rect:mouseout",  "update": "{}"}
+      ]
+    },
+    {"name": "scaleOrient", "value": "vertical",
+      "bind": {
+        "input": "radio",
+        "options": ["horizontal", "vertical"]
+      }
+    }
+  ],
+
+  "scales": [
+    {
+      "name": "vxscale",
+      "type": "band",
+      "domain": {"data": "table", "field": {"signal": "'category'"}},
+      "padding": 0.05,
+      "range": "width"
+    },
+    {
+      "name": "vyscale",
+      "domain": {"data": "table", "field": "amount"},
+      "range": "height"
+    },
+    {
+      "name": "hxscale",
+      "domain": {"data": "table", "field": "amount"},
+      "range": "width"
+    },
+    {
+      "name": "hyscale",
+      "type": "band",
+      "domain": {"data": "table", "field": {"signal": "'category'"}},
+      "padding": 0.05,
+      "range": "height"
+    }
+  ],
+
+  "axes": [
+      { "orient": "bottom", "scale": "vxscale", 
+        "encode": {
+          "domain": {
+            "update":{
+              "stroke":{"signal":"scaleOrient==='vertical'?'black':''"}
+            }
+          },
+          "ticks": {
+            "update":{
+              "stroke": {"signal":"scaleOrient==='vertical'?'black':''"}
+            }
+          },
+          "labels": {
+            "update":{
+              "text": {"signal":"scaleOrient==='vertical'?datum.value:''"}
+            }
+          }
+        }
+      },
+      { "orient": "left", "scale": "vyscale", 
+        "encode": {
+          "domain": {
+            "update":{
+              "stroke":{"signal":"scaleOrient==='vertical'?'black':''"}
+            }
+          },
+          "ticks": {
+            "update":{
+              "stroke": {"signal":"scaleOrient==='vertical'?'black':''"}
+            }
+          },
+          "labels": {
+            "update":{
+              "text": {"signal":"scaleOrient==='vertical'?datum.value:''"}
+            }
+          }
+        }
+      },
+      { "orient": "bottom", "scale": "hxscale",
+        "encode": {
+          "domain": {
+            "update":{
+              "stroke":{"signal":"scaleOrient==='horizontal'?'black':''"}
+            }
+          },
+          "ticks": {
+            "update":{
+              "stroke":{"signal":"scaleOrient==='horizontal'?'black':''"}
+            }
+          },
+          "labels": {
+            "update":{
+              "text": {"signal":"scaleOrient==='horizontal'?datum.value:''"}
+            }
+          }
+        }
+      },
+      { "orient": "left", "scale": "hyscale",
+        "encode": {
+          "domain": {
+            "update":{
+              "stroke":{"signal":"scaleOrient==='horizontal'?'black':''"}
+            }
+          },
+          "ticks": {
+            "update":{
+              "stroke": {"signal":"scaleOrient==='horizontal'?'black':''"}
+            }
+          },
+          "labels": {
+            "update":{
+              "text": {"signal":"scaleOrient==='horizontal'?datum.value:''"}
+            }
+          }
+        }
+      }
+  ],
+
+  "marks": [
+    {
+      "type": "rect",
+      "name": "re",
+      "from": {"data":"table"},
+      "encode": {
+        "update": {
+          "x": {"signal":"scaleOrient==='vertical' ? scale('vxscale',datum.category) : scale('hxscale',datum.amount)"},
+          "x2": {"signal":"scaleOrient==='vertical' ? scale('vxscale',datum.category) + bandwidth('vxscale') : scale('hxscale',0)"},
+          "y": {"signal":"scaleOrient==='vertical' ? scale('vyscale',datum.amount) : scale('hyscale',datum.category)"},
+          "y2": {"signal":"scaleOrient==='vertical' ? scale('vyscale',0) : scale('hyscale',datum.category) + bandwidth('hyscale')"},
+          "fill": {"value": "steelblue"}
+        },
+        "hover": {
+          "fill": {"value": "red"}
+        }
+      }
+    },
+    {
+      "type": "text",
+      "encode": {
+        "enter": {
+          "align": {"value": "center"},
+          "baseline": {"value": "bottom"},
+          "fill": {"value": "#333"}
+        },
+        "update": {
+          "x": {"scale": "vxscale", "signal": "tooltip.category", "band": 0.5},
+          "y": {"scale": "vyscale", "signal": "tooltip.amount", "offset": -2},
+          "text": {"signal": "tooltip.amount"},
+          "fillOpacity": [
+            {"test": "datum === tooltip", "value": 0},
+            {"value": 1}
+          ]
+        }
+      }
+    }
+  ]
+}
