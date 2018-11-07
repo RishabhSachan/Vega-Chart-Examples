@@ -170,8 +170,8 @@
           "fill": {"value": "#333"}
         },
         "update": {
-          "x": {"scale": "vxscale", "signal": "tooltip.category", "band": 0.5},
-          "y": {"scale": "vyscale", "signal": "tooltip.amount", "offset": -2},
+          "x": {"scale": {"signal": "scaleOrient==='vertical'?'vxscale':'hxscale'"}, "signal": "scaleOrient==='vertical'? tooltip.category: tooltip.amount", "band": 0.5},
+          "y": {"scale": {"signal": "scaleOrient==='vertical'?'vyscale':'hyscale'"}, "signal": "scaleOrient==='vertical'? tooltip.amount: tooltip.category", "band":0.5},
           "text": {"signal": "tooltip.amount"},
           "fillOpacity": [
             {"test": "datum === tooltip", "value": 0},
