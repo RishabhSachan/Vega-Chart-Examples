@@ -1,0 +1,181 @@
+{
+ "$schema": "https://vega.github.io/schema/vega/v4.json",
+ "width": 400,
+ "height": 200,
+ "padding": 5,
+ "data": [
+   {
+     "name": "table",
+     "values": [
+       {"category": "A", "amount": 28},
+       {"category": "B", "amount": 55},
+       {"category": "C", "amount": 43},
+       {"category": "D", "amount": 91},
+       {"category": "E", "amount": 81},
+       {"category": "F", "amount": 53},
+       {"category": "G", "amount": 19},
+       {"category": "H", "amount": 87}
+     ]
+   }
+ ],
+ "signals": [
+   {
+     "name": "mainChart",
+     "value":""
+   },
+   {
+     "name": "tooltip",
+     "value": {},
+     "on": [
+       {"events": "rect:mouseover", "update": "datum"},
+       {"events": "rect:mouseout",  "update": "{}"}
+     ]
+   },
+   {
+     "name": "draggex",
+     "value": {},
+     "on": [
+       {"events": "[@barsMark:mousedown, window:mouseup] > window:mousemove",  "update": "clamp(x(), scale('vxscale',domain('vxscale')[0]), scale('vxscale',peek(domain('vxscale'))))"}
+     ]
+   },
+   {
+     "name": "itemSele",
+     "value": {},
+     "on": [
+       {"events": "@barsMark:mousedown",  "update": "item().datum.category"}
+     ]
+   },
+   {"name": "scaleOrient", "value": "vertical",
+      "bind": {
+        "input": "radio",
+        "options": ["horizontal", "vertical"]
+      }
+    }
+ ],
+ "scales": [
+{
+      "name": "vxscale",
+      "type": "band",
+      "domain": {"data": "table", "field": {"signal": "'category'"}},
+      "padding": 0.05,
+      "range": "width"
+    },
+    {
+      "name": "vyscale",
+      "domain": {"data": "table", "field": "amount"},
+      "range": "height"
+    },
+    {
+      "name": "hxscale",
+      "domain": {"data": "table", "field": "amount"},
+      "range": "width"
+    },
+    {
+      "name": "hyscale",
+      "type": "band",
+      "domain": {"data": "table", "field": {"signal": "'category'"}},
+      "padding": 0.05,
+      "range": "height"
+    },
+   {
+     "name": "color",
+     "type": "ordinal",
+     "range": {"scheme": "category10"}
+   }
+ ],
+ "axes": [
+      { "orient": "bottom", "scale": "vxscale", 
+        "encode": {
+          "domain": {
+            "update":{
+              "stroke":{"signal":"scaleOrient==='vertical'?'black':''"}
+            }
+          },
+          "ticks": {
+            "update":{
+              "stroke": {"signal":"scaleOrient==='vertical'?'black':''"}
+            }
+          },
+          "labels": {
+            "update":{
+              "text": {"signal":"scaleOrient==='vertical'?datum.value:''"}
+            }
+          }
+        }
+      },
+      { "orient": "left", "scale": "vyscale", 
+        "encode": {
+          "domain": {
+            "update":{
+              "stroke":{"signal":"scaleOrient==='vertical'?'black':''"}
+            }
+          },
+          "ticks": {
+            "update":{
+              "stroke": {"signal":"scaleOrient==='vertical'?'black':''"}
+            }
+          },
+          "labels": {
+            "update":{
+              "text": {"signal":"scaleOrient==='vertical'?datum.value:''"}
+            }
+          }
+        }
+      },
+      { "orient": "bottom", "scale": "hxscale",
+        "encode": {
+          "domain": {
+            "update":{
+              "stroke":{"signal":"scaleOrient==='horizontal'?'black':''"}
+            }
+          },
+          "ticks": {
+            "update":{
+              "stroke":{"signal":"scaleOrient==='horizontal'?'black':''"}
+            }
+          },
+          "labels": {
+            "update":{
+              "text": {"signal":"scaleOrient==='horizontal'?datum.value:''"}
+            }
+          }
+        }
+      },
+      { "orient": "left", "scale": "hyscale",
+        "encode": {
+          "domain": {
+            "update":{
+              "stroke":{"signal":"scaleOrient==='horizontal'?'black':''"}
+            }
+          },
+          "ticks": {
+            "update":{
+              "stroke": {"signal":"scaleOrient==='horizontal'?'black':''"}
+            }
+          },
+          "labels": {
+            "update":{
+              "text": {"signal":"scaleOrient==='horizontal'?datum.value:''"}
+            }
+          }
+        }
+      }
+  ],
+ "marks": [
+   {
+     "name": "barsMark",
+     "type": "rect",
+     "from": {"data":"table"},
+     "encode": {
+       "update": {
+          "x": {"signal":"datum.category==itemSele ? draggex :(scaleOrient==='vertical' ? scale('vxscale',datum.category) : scale('hxscale',datum.amount))"},
+          "x2": {"signal":"datum.category==itemSele ? draggex + bandwidth('vxscale'):(scaleOrient==='vertical' ? scale('vxscale',datum.category) + bandwidth('vxscale') : scale('hxscale',0))"},
+          "y": {"signal":"scaleOrient==='vertical' ? scale('vyscale',datum.amount) : scale('hyscale',datum.category)"},
+          "y2": {"signal":"scaleOrient==='vertical' ? scale('vyscale',0) : scale('hyscale',datum.category) + bandwidth('hyscale')"},
+         "zindex": {"signal": "datum.category==itemSele?1:0"},
+         "fill": {"scale": "color", "field":"category"}
+       }
+     }
+   }
+ ]
+} 
