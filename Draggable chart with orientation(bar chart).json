@@ -33,16 +33,16 @@
    },
    {
      "name": "draggex",
-     "value": {},
+     "value": "",
      "on": [
-       {"events": "[@barsMark:mousedown, window:mouseup] > window:mousemove",  "update": "scaleOrient=='vertical'?(clamp(x(), scale('vxscale',domain('vxscale')[0]), scale('vxscale',peek(domain('vxscale'))))):{}"}
+       {"events": "[@barsMark:mousedown, window:mouseup] > window:mousemove",  "update": "scaleOrient=='vertical'?(clamp(x(), scale('vxscale',domain('vxscale')[0]), scale('vxscale',peek(domain('vxscale'))))):''"}
      ]
    },
       {
      "name": "draggey",
-     "value": {},
+     "value": "",
      "on": [
-       {"events": "[@barsMark:mousedown, window:mouseup] > window:mousemove",  "update": "scaleOrient=='horizontal'?(clamp(y(), scale('hyscale',domain('hyscale')[0]), scale('hyscale',peek(domain('hyscale'))))):{}"}
+       {"events": "[@barsMark:mousedown, window:mouseup] > window:mousemove",  "update": "scaleOrient=='horizontal'?(clamp(y(), scale('hyscale',domain('hyscale')[0]), scale('hyscale',peek(domain('hyscale'))))):''"}
      ]
    },
    {
