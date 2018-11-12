@@ -35,7 +35,14 @@
      "name": "draggex",
      "value": {},
      "on": [
-       {"events": "[@barsMark:mousedown, window:mouseup] > window:mousemove",  "update": "clamp(x(), scale('vxscale',domain('vxscale')[0]), scale('vxscale',peek(domain('vxscale'))))"}
+       {"events": "[@barsMark:mousedown, window:mouseup] > window:mousemove",  "update": "scaleOrient=='vertical'?(clamp(x(), scale('vxscale',domain('vxscale')[0]), scale('vxscale',peek(domain('vxscale'))))):{}"}
+     ]
+   },
+      {
+     "name": "draggey",
+     "value": {},
+     "on": [
+       {"events": "[@barsMark:mousedown, window:mouseup] > window:mousemove",  "update": "scaleOrient=='horizontal'?(clamp(y(), scale('hyscale',domain('hyscale')[0]), scale('hyscale',peek(domain('hyscale'))))):{}"}
      ]
    },
    {
@@ -168,10 +175,10 @@
      "from": {"data":"table"},
      "encode": {
        "update": {
-          "x": {"signal":"datum.category==itemSele ? draggex :(scaleOrient==='vertical' ? scale('vxscale',datum.category) : scale('hxscale',datum.amount))"},
-          "x2": {"signal":"datum.category==itemSele ? draggex + bandwidth('vxscale'):(scaleOrient==='vertical' ? scale('vxscale',datum.category) + bandwidth('vxscale') : scale('hxscale',0))"},
-          "y": {"signal":"scaleOrient==='vertical' ? scale('vyscale',datum.amount) : scale('hyscale',datum.category)"},
-          "y2": {"signal":"scaleOrient==='vertical' ? scale('vyscale',0) : scale('hyscale',datum.category) + bandwidth('hyscale')"},
+          "x": {"signal":"datum.category==itemSele && scaleOrient==='vertical' ? draggex :(scaleOrient==='vertical' ? scale('vxscale',datum.category) : scale('hxscale',datum.amount))"},
+          "x2": {"signal":"datum.category==itemSele && scaleOrient==='vertical' ? draggex + bandwidth('vxscale'):(scaleOrient==='vertical' ? scale('vxscale',datum.category) + bandwidth('vxscale') : scale('hxscale',0))"},
+          "y": {"signal":"datum.category==itemSele && scaleOrient==='horizontal' ? draggey:(scaleOrient==='vertical' ? scale('vyscale',datum.amount) : scale('hyscale',datum.category))"},
+          "y2": {"signal":"datum.category==itemSele && scaleOrient==='horizontal' ? draggey+ bandwidth('hyscale') :(scaleOrient==='vertical' ? scale('vyscale',0) : scale('hyscale',datum.category) + bandwidth('hyscale'))"},
          "zindex": {"signal": "datum.category==itemSele?1:0"},
          "fill": {"scale": "color", "field":"category"}
        }
